@@ -1,4 +1,6 @@
-﻿using Products.WebApi.Models;
+﻿using Products.WebApi.Interfaces;
+using Products.WebApi.Models;
+using Products.WebApi.Services;
 using System;
 using System.Collections.Generic;
 using System.Web.Http;
@@ -8,37 +10,43 @@ namespace Products.WebApi.Controllers
     [RoutePrefix("Products")]
     public class ProductsController : ApiController
     {
-        [Route("")]
-        public List<Product> Get()
-        {
-            List<Product> products = new List<Product>();
-            using (var ctx = new ProductsContext())
-            {
-                foreach (var p in ctx.ProductSet)
-                {
-                    products.Add(p);
-                }
-            }
+        #region Fields
 
-            return products;
+        IProductsService _productsService;
+
+        #endregion
+
+        #region Constructor
+
+        public ProductsController()
+        {
+            _productsService = new EFProductsService();
+        }
+
+        #endregion
+
+        #region Methods
+
+        [Route("")]
+        public IEnumerable<Product> Get()
+        {
+            return _productsService.GetProducts();
         }
 
         [Route("")]
-        public async void Post([FromBody]ProductModel p)
+        public void Post([FromBody]ProductModel p)
         {
-            using (var ctx = new ProductsContext())
+            Product product = new Product()
             {
-                Product product = new Product()
-                {
-                    Id = p.id,
-                    Name = p.name,
-                    Price = p.price,
-                    LastUpdated = DateTime.Now
-                };
+                Id = p.id,
+                Name = p.name,
+                Price = p.price,
+                LastUpdated = DateTime.Now
+            };
 
-                ctx.ProductSet.Add(product);
-                int result = await ctx.SaveChangesAsync();
-            }
+            _productsService.InsertProduct(product);
         }
+
+        #endregion
     }
 }
