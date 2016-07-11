@@ -1,9 +1,11 @@
 ﻿using Products.Client.Utils;
+using Products.Client.Views;
 using Products.WebApi.Models;
 using System;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Windows;
 using System.Windows.Input;
 
 
@@ -31,34 +33,52 @@ namespace Products.Client.ViewModels
 
         private async void insertProducts(object obj)
         {
-            using (var client = new HttpClient())
+            ProductViewModel p = new ProductViewModel();
+            ProductPropertiesView v = new ProductPropertiesView();
+            ((ProductPropertiesViewModel)(v.DataContext)).Product = p;
+            if (v.ShowDialog() == true)
             {
-                client.BaseAddress = new Uri("http://localhost:51160/");
-                ProductModel p = new ProductModel();
-                var response = await client.PostAsJsonAsync("Products", p);
-                if (response.IsSuccessStatusCode)
+                try
                 {
-                    // Get the URI of the created resource.
-                    Uri productUrl = response.Headers.Location;
+                    using (var client = new HttpClient())
+                    {
+                        client.BaseAddress = new Uri("http://localhost:51160/");
+                        var response = await client.PostAsJsonAsync("Products", p);
+                        if (response.IsSuccessStatusCode)
+                        {
+                            // Get the URI of the created resource.
+                            Uri productUrl = response.Headers.Location;
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.Message, ex.GetType().Name);
                 }
             }
         }
 
         private async void getProducts(object obj)
         {
-            using (var client = new HttpClient())
-            {
-                client.BaseAddress = new Uri("http://localhost:51160/");
-                client.DefaultRequestHeaders.Accept.Clear();
-                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-
-                // New code:
-                HttpResponseMessage response = await client.GetAsync("products");
-                if (response.IsSuccessStatusCode)
+            try
+            { 
+                using (var client = new HttpClient())
                 {
-                    //ok
-                    List<Product> p = await response.Content.ReadAsAsync<List<Product>>();
+                    client.BaseAddress = new Uri("http://localhost:51160/");
+                    client.DefaultRequestHeaders.Accept.Clear();
+                    client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+                    HttpResponseMessage response = await client.GetAsync("products");
+                    if (response.IsSuccessStatusCode)
+                    {
+                        //ok
+                        List<Product> p = await response.Content.ReadAsAsync<List<Product>>();
+                    }
                 }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, ex.GetType().Name);
             }
         }
     }
