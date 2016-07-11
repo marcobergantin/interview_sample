@@ -12,26 +12,25 @@
             <ColumnDefinition/>
             <ColumnDefinition/>
         </Grid.ColumnDefinitions>
-        
-        <Grid.RowDefinitions>
-            <RowDefinition/>
-            <RowDefinition/>
-        </Grid.RowDefinitions>
-        
-        <Button Grid.Column="0" Grid.Row="0" Content="Get Products" Command="{Binding CmdGetProducts}"/>
-        <Button Grid.Column="0" Grid.Row="1" Content="Insert a Product" Command="{Binding CmdInsertProducts}"/>
 
+        <StackPanel Grid.Column="0" >
+            <Button Content="Get Products" Command="{Binding CmdGetProducts}"/>
+            <Button Content="Insert a Product" Command="{Binding CmdInsertProducts}"/>
+            <Button Content="Modiy selected Product" Command="{Binding CmdModifyProduct}"/>
+        </StackPanel>
+        
         <ListBox 
             Grid.Column="1"
-            Grid.RowSpan="2"
-            ItemsSource="{Binding Products}">
+            ItemsSource="{Binding Products}"
+            SelectedItem="{Binding SelectedProduct}">
 
             <ListBox.ItemTemplate>
                 <DataTemplate>
 
                     <StackPanel Background="AliceBlue">
-                        <TextBlock Text="{Binding Name}"/>
-                            <TextBlock Text="{Binding Price}"/>
+                        <TextBlock Text="{Binding Id}" FontStyle="Italic" FontWeight="Light"/>
+                        <TextBlock Text="{Binding Name}" FontWeight="Bold"/>
+                        <TextBlock Text="{Binding Price}"/>
                     </StackPanel>
                     
                 </DataTemplate>

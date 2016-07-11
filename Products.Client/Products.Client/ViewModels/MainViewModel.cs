@@ -26,6 +26,12 @@ namespace Products.Client.ViewModels
             set;
         }
 
+        public Product SelectedProduct
+        {
+            get;
+            set;
+        }
+
         #endregion
 
         #region Commands
@@ -48,6 +54,16 @@ namespace Products.Client.ViewModels
             }
         }
 
+        private ICommand cmdModifyProduct;
+        public ICommand CmdModifyProduct
+        {
+            get
+            {
+                return this.cmdModifyProduct ?? (this.cmdModifyProduct = 
+                    new RelayCommand(this.ModifyProduct));
+            }
+        }
+
         #endregion
 
         #region Constructor
@@ -67,6 +83,35 @@ namespace Products.Client.ViewModels
         #endregion
 
         #region Methods
+
+        private async void ModifyProduct(object obj)
+        {
+            ProductViewModel p = new ProductViewModel()
+            {
+                Name = this.SelectedProduct.Name,
+                Price = this.SelectedProduct.Price
+            };
+
+            ProductPropertiesView v = new ProductPropertiesView();
+            ((ProductPropertiesViewModel)(v.DataContext)).Product = p;
+            if (v.ShowDialog() == true)
+            {
+                try
+                {
+                    string uri = string.Format("Products/{0}", this.SelectedProduct.Id);
+                    var response = await _client.PutAsJsonAsync(uri, p);
+                    if (response.IsSuccessStatusCode)
+                    {
+                        // Get the URI of the created resource.
+                        Uri productUrl = response.Headers.Location;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.Message, ex.GetType().Name);
+                }
+            }
+        }
 
         private async void InsertProducts(object obj)
         {
