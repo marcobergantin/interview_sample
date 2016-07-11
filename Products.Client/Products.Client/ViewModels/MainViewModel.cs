@@ -98,7 +98,7 @@ namespace Products.Client.ViewModels
                 HttpResponseMessage response = await _client.GetAsync("products");
                 if (response.IsSuccessStatusCode)
                 {
-                    this.Products = await response.Content.ReadAsAsync<List<Product>>();
+                    this.Products = await response.Content.ReadAsAsync<IEnumerable<Product>>();
                     this.NotifyPropertyChanged(nameof(this.Products));
                 }
             }
