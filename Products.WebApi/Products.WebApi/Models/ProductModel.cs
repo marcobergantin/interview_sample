@@ -7,8 +7,7 @@ namespace Products.WebApi.Models
 {
     public class ProductModel
     {
-        public int id { get; set; }
-        public string name { get; set; }
-        public float price { get; set; }
+        public string Name { get; set; }
+        public float Price { get; set; }
     }
 }

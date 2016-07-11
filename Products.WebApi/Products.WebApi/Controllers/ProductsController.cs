@@ -36,17 +36,14 @@ namespace Products.WebApi.Controllers
         [Route("")]
         public void Post([FromBody]ProductModel p)
         {
-            Product product = new Product()
-            {
-                Id = p.id,
-                Name = p.name,
-                Price = p.price,
-                LastUpdated = DateTime.Now
-            };
-
-            _productsService.InsertProduct(product);
+            _productsService.InsertProduct(p);
         }
 
+        [Route("{id}")]
+        public void Put(int id, [FromBody]ProductModel p)
+        {
+            _productsService.ModifyProduct(id, p);
+        }
         #endregion
     }
 }

@@ -1,10 +1,12 @@
-﻿using System.Collections.Generic;
+﻿using Products.WebApi.Models;
+using System.Collections.Generic;
 
 namespace Products.WebApi.Interfaces
 {
     public interface IProductsService
     {
         IEnumerable<Product> GetProducts();
-        void InsertProduct(Product p);
+        void InsertProduct(ProductModel p);
+        void ModifyProduct(int id, ProductModel p);
     }
 }

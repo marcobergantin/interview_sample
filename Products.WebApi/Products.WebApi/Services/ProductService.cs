@@ -1,5 +1,8 @@
 ﻿using System.Collections.Generic;
 using Products.WebApi.Interfaces;
+using Products.WebApi.Models;
+using System;
+using System.Linq;
 
 namespace Products.WebApi.Services
 {
@@ -15,7 +18,7 @@ namespace Products.WebApi.Services
 
         public EFProductsService()
         {
-
+            _productsContext = new ProductsContext();
         }
 
         #endregion
@@ -24,8 +27,6 @@ namespace Products.WebApi.Services
 
         public IEnumerable<Product> GetProducts()
         {
-            this.LazyInit();
-
             List<Product> products = new List<Product>();
             foreach (var p in _productsContext.ProductSet)
             {
@@ -35,20 +36,33 @@ namespace Products.WebApi.Services
             return products;
         }
 
-        public async void InsertProduct(Product p)
+        public async void InsertProduct(ProductModel p)
         {
-            this.LazyInit();
+            Product product = new Product()
+            {
+                Id = _productsContext.ProductSet.Count(),
+                Name = p.Name,
+                Price = p.Price,
+                LastUpdated = DateTime.Now
+            };
 
-            _productsContext.ProductSet.Add(p);
+            _productsContext.ProductSet.Add(product);
             await _productsContext.SaveChangesAsync();
         }
 
-        private void LazyInit()
+        public async void ModifyProduct(int id, ProductModel product)
         {
-            if (_productsContext == null)
+            Product dbEntry = _productsContext.ProductSet.Where(p => p.Id == id)
+                                                         .FirstOrDefault();
+            if (dbEntry != null)
             {
-                _productsContext = new ProductsContext();
+                dbEntry.Name = product.Name;
+                dbEntry.Price = product.Price;
+                dbEntry.LastUpdated = DateTime.Now;
+
+                await _productsContext.SaveChangesAsync();
             }
+
         }
 
         #endregion
