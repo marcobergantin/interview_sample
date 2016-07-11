@@ -1,4 +1,5 @@
-﻿using Products.Client.Utils;
+﻿using Products.Client.Models;
+using Products.Client.Utils;
 using Products.Client.Views;
 using System;
 using System.Collections.Generic;
@@ -11,18 +12,30 @@ namespace Products.Client.ViewModels
 {
     public class MainViewModel : BaseViewModel
     {
+        #region Fields
+
+        private HttpClient _client;
+
+        #endregion
+
+        #region Properties
+
         public IEnumerable<Product> Products
         {
             get;
             set;
         }
 
+        #endregion
+
+        #region Commands
+
         private ICommand cmdGetProducts;
         public ICommand CmdGetProducts
         {
             get
             {
-                return this.cmdGetProducts ?? (this.cmdGetProducts = new RelayCommand(this.getProducts));
+                return this.cmdGetProducts ?? (this.cmdGetProducts = new RelayCommand(this.GetProducts));
             }
         }
 
@@ -31,11 +44,31 @@ namespace Products.Client.ViewModels
         {
             get
             {
-                return this.cmdInsertProducts ?? (this.cmdInsertProducts = new RelayCommand(this.insertProducts));
+                return this.cmdInsertProducts ?? (this.cmdInsertProducts = new RelayCommand(this.InsertProducts));
             }
         }
 
-        private async void insertProducts(object obj)
+        #endregion
+
+        #region Constructor
+
+        public MainViewModel()
+        {
+            _client = new HttpClient()
+            {
+                BaseAddress = new Uri("http://localhost:51160/")
+            };
+
+            _client.DefaultRequestHeaders.Accept.Clear();
+            _client.DefaultRequestHeaders.Accept.Add(new
+                MediaTypeWithQualityHeaderValue("application/json"));
+        }
+
+        #endregion
+
+        #region Methods
+
+        private async void InsertProducts(object obj)
         {
             ProductViewModel p = new ProductViewModel();
             ProductPropertiesView v = new ProductPropertiesView();
@@ -44,15 +77,11 @@ namespace Products.Client.ViewModels
             {
                 try
                 {
-                    using (var client = new HttpClient())
+                    var response = await _client.PostAsJsonAsync("Products", p);
+                    if (response.IsSuccessStatusCode)
                     {
-                        client.BaseAddress = new Uri("http://localhost:51160/");
-                        var response = await client.PostAsJsonAsync("Products", p);
-                        if (response.IsSuccessStatusCode)
-                        {
-                            // Get the URI of the created resource.
-                            Uri productUrl = response.Headers.Location;
-                        }
+                        // Get the URI of the created resource.
+                        Uri productUrl = response.Headers.Location;
                     }
                 }
                 catch (Exception ex)
@@ -62,22 +91,15 @@ namespace Products.Client.ViewModels
             }
         }
 
-        private async void getProducts(object obj)
+        private async void GetProducts(object obj)
         {
             try
-            { 
-                using (var client = new HttpClient())
+            {
+                HttpResponseMessage response = await _client.GetAsync("products");
+                if (response.IsSuccessStatusCode)
                 {
-                    client.BaseAddress = new Uri("http://localhost:51160/");
-                    client.DefaultRequestHeaders.Accept.Clear();
-                    client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-
-                    HttpResponseMessage response = await client.GetAsync("products");
-                    if (response.IsSuccessStatusCode)
-                    {
-                        this.Products = await response.Content.ReadAsAsync<List<Product>>();
-                        this.NotifyPropertyChanged(nameof(this.Products));
-                    }
+                    this.Products = await response.Content.ReadAsAsync<List<Product>>();
+                    this.NotifyPropertyChanged(nameof(this.Products));
                 }
             }
             catch (Exception ex)
@@ -85,13 +107,12 @@ namespace Products.Client.ViewModels
                 MessageBox.Show(ex.Message, ex.GetType().Name);
             }
         }
-    }
 
-    public class Product
-    {
-        public int Id { get; set; }
-        public string Name { get; set; }
-        public float Price { get; set; }
-        public DateTime LastUpdated { get; set; }
+        public void Dispose()
+        {
+            this._client.Dispose();
+        }
+
+        #endregion
     }
 }
