@@ -1,6 +1,5 @@
 ﻿using Products.Client.Utils;
 using Products.Client.Views;
-using Products.WebApi.Models;
 using System;
 using System.Collections.Generic;
 using System.Net.Http;
@@ -8,11 +7,16 @@ using System.Net.Http.Headers;
 using System.Windows;
 using System.Windows.Input;
 
-
 namespace Products.Client.ViewModels
 {
-    public class MainViewModel
+    public class MainViewModel : BaseViewModel
     {
+        public IEnumerable<Product> Products
+        {
+            get;
+            set;
+        }
+
         private ICommand cmdGetProducts;
         public ICommand CmdGetProducts
         {
@@ -71,8 +75,8 @@ namespace Products.Client.ViewModels
                     HttpResponseMessage response = await client.GetAsync("products");
                     if (response.IsSuccessStatusCode)
                     {
-                        //ok
-                        List<Product> p = await response.Content.ReadAsAsync<List<Product>>();
+                        this.Products = await response.Content.ReadAsAsync<List<Product>>();
+                        this.NotifyPropertyChanged(nameof(this.Products));
                     }
                 }
             }

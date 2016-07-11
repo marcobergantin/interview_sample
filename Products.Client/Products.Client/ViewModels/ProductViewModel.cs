@@ -7,10 +7,8 @@ using System.Threading.Tasks;
 
 namespace Products.Client.ViewModels
 {
-    public class ProductViewModel : INotifyPropertyChanged
+    public class ProductViewModel : BaseViewModel
     {
-        public event PropertyChangedEventHandler PropertyChanged;
-
         private string name;
         public string Name
         {
@@ -30,14 +28,6 @@ namespace Products.Client.ViewModels
             {
                 this.price = value;
                 this.NotifyPropertyChanged(nameof(this.Price));
-            }
-        }
-
-        private void NotifyPropertyChanged(string info)
-        {
-            if (PropertyChanged != null)
-            {
-                PropertyChanged(this, new PropertyChangedEventArgs(info));
             }
         }
     }
