@@ -1,8 +1,6 @@
 ﻿using Products.WebApi.Models;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Web;
 using System.Web.Http;
 
 namespace Products.WebApi.Controllers
@@ -10,26 +8,37 @@ namespace Products.WebApi.Controllers
     [RoutePrefix("Products")]
     public class ProductsController : ApiController
     {
-        static List<Product> products = new List<Product>();
-
         [Route("")]
         public List<Product> Get()
-        {       
+        {
+            List<Product> products = new List<Product>();
+            using (var ctx = new ProductsContext())
+            {
+                foreach (var p in ctx.ProductSet)
+                {
+                    products.Add(p);
+                }
+            }
+
             return products;
         }
 
         [Route("")]
-        public void Post([FromBody]ProductModel p)
+        public async void Post([FromBody]ProductModel p)
         {
-            Product product = new Product()
+            using (var ctx = new ProductsContext())
             {
-                Id = p.id,
-                Name = p.name,
-                Price = p.price,
-                LastUpdated = DateTime.Now
-            };
+                Product product = new Product()
+                {
+                    Id = p.id,
+                    Name = p.name,
+                    Price = p.price,
+                    LastUpdated = DateTime.Now
+                };
 
-            products.Add(product);
+                ctx.ProductSet.Add(product);
+                int result = await ctx.SaveChangesAsync();
+            }
         }
     }
 }
