@@ -3,22 +3,25 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:converters="clr-namespace:Products.Client.Converters"
         xmlns:local="clr-namespace:Products.Client.Views"
         mc:Ignorable="d"
         Title="ProductPropertiesView" Height="300" Width="300">
-    <Grid>
 
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="0.5*"/>
-            <ColumnDefinition Width="0.5*"/>
-        </Grid.ColumnDefinitions>
-        
-        <Grid.RowDefinitions>
-            <RowDefinition Height="25"/>
-            <RowDefinition Height="25"/>
-            <RowDefinition Height="25"/>
-        </Grid.RowDefinitions>
-        
+    <Window.Resources>
+        <converters:BinaryImageConverter x:Key="imgConverter" />
+    </Window.Resources>
+
+    <StackPanel>
+
+        <Image Source="{Binding Path=Product.Image, Converter={StaticResource imgConverter}}" 
+               Stretch="UniformToFill" 
+               StretchDirection="Both">
+            <Image.BitmapEffect>
+                <DropShadowBitmapEffect Color="Black" />
+            </Image.BitmapEffect>
+        </Image>
+
         <Label Grid.Row="0" Grid.Column="0" Content="Name"/>
         <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding Product.Name}"/>
 
@@ -26,5 +29,7 @@
         <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding Product.Price}"/>
 
         <Button Grid.Row="2" Grid.Column="1" Content="Ok" Click="Button_Click"/>
-    </Grid>
+
+    </StackPanel>
+    
 </Window>

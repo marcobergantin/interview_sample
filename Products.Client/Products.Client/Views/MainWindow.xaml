@@ -17,6 +17,7 @@
             <Button Content="Get Products" Command="{Binding CmdGetProducts}"/>
             <Button Content="Insert a Product" Command="{Binding CmdInsertProducts}"/>
             <Button Content="Modify selected Product" Command="{Binding CmdModifyProduct}"/>
+            <Button Content="Insert Image" Command="{Binding CmdInsertImage}"/>
             <Button Content="Delete selected Product" Command="{Binding CmdDeleteProduct}"/>         
         </StackPanel>
         

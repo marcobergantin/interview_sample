@@ -1,9 +1,9 @@
 ﻿using Products.WebApi.Interfaces;
 using Products.WebApi.Models;
 using System;
-using System.Threading.Tasks;
+using System.Drawing;
+using System.IO;
 using System.Web.Http;
-using System.Web.Http.Routing;
 
 namespace Products.WebApi.Controllers
 {
@@ -49,15 +49,10 @@ namespace Products.WebApi.Controllers
         }
 
         [Route("")]
-        public async Task<IHttpActionResult> Post([FromBody]ProductModel p)
+        public IHttpActionResult Post([FromBody]ProductModel p)
         {
-            Product inserted = await _productsService.InsertProduct(p);
-
-            UrlHelper uriHelper = new UrlHelper(this.Request);
-            uriHelper.Route("Products", inserted.Id);
-
-            //return also link to product
-            return Created(uriHelper.ToString(), inserted);
+            _productsService.InsertProduct(p);
+            return Ok();
         }
 
         [Route("{id}")]
@@ -87,6 +82,30 @@ namespace Products.WebApi.Controllers
                 return NotFound();
             }
         }
+
+        [Route("Images/{id}")]
+        public IHttpActionResult Put(int id, [FromBody]byte[] buffer)
+        {
+            try
+            {
+                Image image = Image.FromStream(new MemoryStream(buffer));
+                if (image != null)
+                {
+                    //image parsed successfully
+                    _productsService.InsertImageForProduct(id, buffer);
+                    return Ok();
+                }
+                else
+                {
+                    return BadRequest();
+                }
+            }
+            catch (ArgumentException)
+            {
+                return NotFound();
+            }
+        }
+
         #endregion
     }
 }

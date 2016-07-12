@@ -3,6 +3,7 @@ using Products.Client.Utils;
 using Products.Client.Views;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Windows;
@@ -74,6 +75,16 @@ namespace Products.Client.ViewModels
             }
         }
 
+        private ICommand cmdInsertImage;
+        public ICommand CmdInsertImage
+        {
+            get
+            {
+                return this.cmdInsertImage ?? (this.cmdInsertImage =
+                    new RelayCommand(this.InsertImage));
+            }
+        }
+
         #endregion
 
         #region Constructor
@@ -99,7 +110,8 @@ namespace Products.Client.ViewModels
             ProductViewModel p = new ProductViewModel()
             {
                 Name = this.SelectedProduct.Name,
-                Price = this.SelectedProduct.Price
+                Price = this.SelectedProduct.Price,
+                Image = this.SelectedProduct.Image
             };
 
             ProductPropertiesView v = new ProductPropertiesView();
@@ -179,6 +191,31 @@ namespace Products.Client.ViewModels
             {
                 MessageBox.Show(ex.Message, ex.GetType().Name);
             }          
+        }
+
+        private async void InsertImage(object obj)
+        {
+            ProductViewModel p = new ProductViewModel()
+            {
+                Name = this.SelectedProduct.Name,
+                Price = this.SelectedProduct.Price
+            };
+
+            p.CmdInsertImage.Execute(null);
+            try
+            {
+                string uri = string.Format("Products/Images/{0}", this.SelectedProduct.Id);
+                var response = await _client.PutAsJsonAsync(uri, p.Image);
+                if (response.IsSuccessStatusCode)
+                {
+                    // Get the URI of the created resource.
+                    Uri productUrl = response.Headers.Location;
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, ex.GetType().Name);
+            }   
         }
 
 

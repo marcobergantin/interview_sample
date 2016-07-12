@@ -24,7 +24,7 @@ namespace Products.WebApi.Services
 
         #endregion
 
-        #region Methods
+        #region IProductsService Implements
 
         public IEnumerable<Product> GetProducts()
         {
@@ -46,11 +46,11 @@ namespace Products.WebApi.Services
             }
             else
             {
-                throw new ArgumentException("No element found with ID = " + id);
+                throw new ArgumentException(this.ProductNotFoundMessage(id));
             }
         }
 
-        public async Task<Product> InsertProduct(ProductModel p)
+        public async void InsertProduct(ProductModel p)
         {
             Product product = new Product()
             {
@@ -62,7 +62,6 @@ namespace Products.WebApi.Services
 
             _productsContext.ProductSet.Add(product);
             await _productsContext.SaveChangesAsync();
-            return product;
         }
 
         public async void ModifyProduct(int id, ProductModel product)
@@ -78,7 +77,7 @@ namespace Products.WebApi.Services
             }
             else
             {
-                throw new ArgumentException("No element found with ID = " + id);
+                throw new ArgumentException(this.ProductNotFoundMessage(id));
             }
         }
 
@@ -92,14 +91,42 @@ namespace Products.WebApi.Services
             }
             else
             {
-                throw new ArgumentException("No element found with ID = " + id);
+                throw new ArgumentException(this.ProductNotFoundMessage(id));
             }
         }
+
+        public async void InsertImageForProduct(int productId, byte[] image)
+        {
+            Product dbEntry = this.GetProductFromDB(productId);
+            if (dbEntry != null)
+            {
+                await this.InsertImageForProduct(dbEntry, image);
+            }
+            else
+            {
+                throw new ArgumentException(this.ProductNotFoundMessage(productId));
+            }
+        }
+
+        private async Task<int> InsertImageForProduct(Product product, byte[] image)
+        {
+            product.Image = image;
+            return await _productsContext.SaveChangesAsync();
+        }
+
+        #endregion
+
+        #region Utils
 
         private Product GetProductFromDB(int id)
         {
             return _productsContext.ProductSet.Where(p => p.Id == id)
                                                          .FirstOrDefault();
+        }
+
+        private string ProductNotFoundMessage(int id)
+        {
+            return "No element found with ID = " + id;
         }
 
         #endregion

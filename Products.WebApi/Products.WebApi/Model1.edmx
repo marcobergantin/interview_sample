@@ -16,6 +16,7 @@
     <Property Name="Name" Type="nvarchar(max)" Nullable="false" />
     <Property Name="Price" Type="real" Nullable="false" />
     <Property Name="LastUpdated" Type="datetime" Nullable="false" />
+    <Property Name="Image" Type="varbinary(max)" Nullable="true" />
   </EntityType>
 </Schema></edmx:StorageModels>
     <!-- CSDL content -->
@@ -32,6 +33,7 @@
           <Property Name="Name" Type="String" Nullable="false" />
           <Property Name="Price" Type="Single" Nullable="false" />
           <Property Name="LastUpdated" Type="DateTime" Nullable="false" />
+          <Property Name="Image" Type="Binary" Nullable="true" />
         </EntityType>
       </Schema>
     </edmx:ConceptualModels>
@@ -46,6 +48,7 @@
           <ScalarProperty Name="Name" ColumnName="Name" />
           <ScalarProperty Name="Price" ColumnName="Price" />
           <ScalarProperty Name="LastUpdated" ColumnName="LastUpdated" />
+          <ScalarProperty Name="Image" ColumnName="Image" />
         </MappingFragment>
       </EntityTypeMapping>
     </EntitySetMapping>

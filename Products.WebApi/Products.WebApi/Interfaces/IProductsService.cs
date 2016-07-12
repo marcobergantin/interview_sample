@@ -1,6 +1,5 @@
 ﻿using Products.WebApi.Models;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace Products.WebApi.Interfaces
 {
@@ -8,7 +7,8 @@ namespace Products.WebApi.Interfaces
     {
         IEnumerable<Product> GetProducts();
         Product GetProduct(int id);
-        Task<Product> InsertProduct(ProductModel p);
+        void InsertProduct(ProductModel p);
+        void InsertImageForProduct(int productId, byte[] image);
         void ModifyProduct(int id, ProductModel p);
         void DeleteProduct(int id);
     }

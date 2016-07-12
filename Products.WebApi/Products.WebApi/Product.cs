@@ -18,5 +18,6 @@ namespace Products.WebApi
         public string Name { get; set; }
         public float Price { get; set; }
         public System.DateTime LastUpdated { get; set; }
+        public byte[] Image { get; set; }
     }
 }
