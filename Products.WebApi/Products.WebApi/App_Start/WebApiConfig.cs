@@ -4,6 +4,7 @@ using Ninject;
 using WebApiContrib.IoC.Ninject;
 using System.Web.Http.Dependencies;
 using Products.WebApi.IoC;
+using Products.WebApi.Logging;
 
 namespace Products.WebApi
 {
@@ -24,6 +25,10 @@ namespace Products.WebApi
                 routeTemplate: "api/{controller}/{id}",
                 defaults: new { id = RouteParameter.Optional }
             );
+
+            //use custom logger
+            GlobalConfiguration.Configuration.Services.Replace(
+                typeof(System.Web.Http.Tracing.ITraceWriter), new NLogger());
 
             //Dependency Resolver setup
             IKernel kernel = new StandardKernel(new ResolverModule());

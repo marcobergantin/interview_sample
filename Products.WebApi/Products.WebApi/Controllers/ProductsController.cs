@@ -4,6 +4,7 @@ using System;
 using System.Drawing;
 using System.IO;
 using System.Web.Http;
+using System.Web.Http.Tracing;
 
 namespace Products.WebApi.Controllers
 {
@@ -13,6 +14,9 @@ namespace Products.WebApi.Controllers
         #region Fields
 
         IProductsService _productsService;
+        ITraceWriter _tracer;
+
+        readonly string _loggerCategory = nameof(ProductsController);
 
         #endregion
 
@@ -23,6 +27,7 @@ namespace Products.WebApi.Controllers
             _productsService = (IProductsService)GlobalConfiguration.Configuration
                                                                     .DependencyResolver
                                                                     .GetService(typeof(IProductsService));
+            _tracer = GlobalConfiguration.Configuration.Services.GetTraceWriter();
         }
 
         #endregion
@@ -32,6 +37,7 @@ namespace Products.WebApi.Controllers
         [Route("")]
         public IHttpActionResult Get()
         {
+            this.TraceRequest();
             return Ok(_productsService.GetProducts());
         }
 
@@ -40,10 +46,12 @@ namespace Products.WebApi.Controllers
         {
             try
             {
+                this.TraceRequest();
                 return Ok(_productsService.GetProduct(id));
             }
-            catch (ArgumentException)
+            catch (ArgumentException ex)
             {
+                _tracer.Error(Request, _loggerCategory, ex);
                 return NotFound();
             }
         }
@@ -51,6 +59,7 @@ namespace Products.WebApi.Controllers
         [Route("")]
         public IHttpActionResult Post([FromBody]ProductModel p)
         {
+            this.TraceRequest();
             _productsService.InsertProduct(p);
             return Ok();
         }
@@ -60,11 +69,13 @@ namespace Products.WebApi.Controllers
         {
             try
             {
+                this.TraceRequest();
                 _productsService.ModifyProduct(id, p);
                 return Ok();
             }
-            catch (ArgumentException)
+            catch (ArgumentException ex)
             {
+                _tracer.Error(Request, _loggerCategory, ex);
                 return NotFound();
             }
         }
@@ -74,11 +85,13 @@ namespace Products.WebApi.Controllers
         {
             try
             {
+                this.TraceRequest();
                 _productsService.DeleteProduct(id);
                 return Ok();
             }
-            catch (ArgumentException)
+            catch (ArgumentException ex)
             {
+                _tracer.Error(Request, _loggerCategory, ex);
                 return NotFound();
             }
         }
@@ -88,6 +101,7 @@ namespace Products.WebApi.Controllers
         {
             try
             {
+                this.TraceRequest();
                 Image image = Image.FromStream(new MemoryStream(buffer));
                 if (image != null)
                 {
@@ -97,13 +111,20 @@ namespace Products.WebApi.Controllers
                 }
                 else
                 {
+                    _tracer.Error(Request, _loggerCategory, "Couldn't parse img", null);
                     return BadRequest();
                 }
             }
-            catch (ArgumentException)
+            catch (ArgumentException ex)
             {
+                _tracer.Error(Request, _loggerCategory, ex);
                 return NotFound();
             }
+        }
+
+        private void TraceRequest()
+        {
+            _tracer.Info(Request, _loggerCategory, string.Empty, new string[] { });
         }
 
         #endregion
