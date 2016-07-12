@@ -44,6 +44,12 @@ namespace Products.WebApi.Controllers
         {
             _productsService.ModifyProduct(id, p);
         }
+
+        [Route("{id}")]
+        public void Delete(int id)
+        {
+            _productsService.DeleteProduct(id);
+        }
         #endregion
     }
 }

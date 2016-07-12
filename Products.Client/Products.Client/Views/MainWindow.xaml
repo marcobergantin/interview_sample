@@ -16,7 +16,8 @@
         <StackPanel Grid.Column="0" >
             <Button Content="Get Products" Command="{Binding CmdGetProducts}"/>
             <Button Content="Insert a Product" Command="{Binding CmdInsertProducts}"/>
-            <Button Content="Modiy selected Product" Command="{Binding CmdModifyProduct}"/>
+            <Button Content="Modify selected Product" Command="{Binding CmdModifyProduct}"/>
+            <Button Content="Delete selected Product" Command="{Binding CmdDeleteProduct}"/>         
         </StackPanel>
         
         <ListBox 

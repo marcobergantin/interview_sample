@@ -8,5 +8,6 @@ namespace Products.WebApi.Interfaces
         IEnumerable<Product> GetProducts();
         void InsertProduct(ProductModel p);
         void ModifyProduct(int id, ProductModel p);
+        void DeleteProduct(int id);
     }
 }

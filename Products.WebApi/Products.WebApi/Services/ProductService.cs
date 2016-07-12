@@ -65,6 +65,17 @@ namespace Products.WebApi.Services
 
         }
 
+        public async void DeleteProduct(int id)
+        {
+            Product dbEntry = _productsContext.ProductSet.Where(p => p.Id == id)
+                                                         .FirstOrDefault();
+            if (dbEntry != null)
+            {
+                _productsContext.ProductSet.Remove(dbEntry);
+                await _productsContext.SaveChangesAsync();
+            }
+        }
+
         #endregion
     }
 }

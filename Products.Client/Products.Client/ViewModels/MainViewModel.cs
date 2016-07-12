@@ -64,6 +64,16 @@ namespace Products.Client.ViewModels
             }
         }
 
+        private ICommand cmdDeleteProduct;
+        public ICommand CmdDeleteProduct
+        {
+            get
+            {
+                return this.cmdDeleteProduct ?? (this.cmdDeleteProduct =
+                    new RelayCommand(this.DeleteProduct));
+            }
+        }
+
         #endregion
 
         #region Constructor
@@ -152,6 +162,25 @@ namespace Products.Client.ViewModels
                 MessageBox.Show(ex.Message, ex.GetType().Name);
             }
         }
+
+        private async void DeleteProduct(object obj)
+        {
+            try
+            {
+                string uri = string.Format("Products/{0}", this.SelectedProduct.Id);
+                var response = await _client.DeleteAsync(uri);
+                if (response.IsSuccessStatusCode)
+                {
+                    // Get the URI of the created resource.
+                    Uri productUrl = response.Headers.Location;
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, ex.GetType().Name);
+            }          
+        }
+
 
         public void Dispose()
         {
