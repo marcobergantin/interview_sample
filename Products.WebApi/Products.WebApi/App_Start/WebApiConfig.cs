@@ -1,5 +1,9 @@
 ﻿using System.Web.Http;
 using Microsoft.Owin.Security.OAuth;
+using Ninject;
+using WebApiContrib.IoC.Ninject;
+using System.Web.Http.Dependencies;
+using Products.WebApi.IoC;
 
 namespace Products.WebApi
 {
@@ -20,6 +24,12 @@ namespace Products.WebApi
                 routeTemplate: "api/{controller}/{id}",
                 defaults: new { id = RouteParameter.Optional }
             );
+
+            //Dependency Resolver setup
+            IKernel kernel = new StandardKernel(new ResolverModule());
+            IDependencyResolver ninjectResolver = new NinjectResolver(kernel);
+
+            GlobalConfiguration.Configuration.DependencyResolver = ninjectResolver;
         }
     }
 }

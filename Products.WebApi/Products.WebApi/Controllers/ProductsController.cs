@@ -1,7 +1,5 @@
 ﻿using Products.WebApi.Interfaces;
 using Products.WebApi.Models;
-using Products.WebApi.Services;
-using System;
 using System.Collections.Generic;
 using System.Web.Http;
 
@@ -20,7 +18,9 @@ namespace Products.WebApi.Controllers
 
         public ProductsController()
         {
-            _productsService = new EFProductsService();
+            _productsService = (IProductsService)GlobalConfiguration.Configuration
+                                                                    .DependencyResolver
+                                                                    .GetService(typeof(IProductsService));
         }
 
         #endregion
