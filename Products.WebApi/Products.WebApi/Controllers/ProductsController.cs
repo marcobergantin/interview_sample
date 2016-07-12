@@ -1,7 +1,9 @@
 ﻿using Products.WebApi.Interfaces;
 using Products.WebApi.Models;
-using System.Collections.Generic;
+using System;
+using System.Threading.Tasks;
 using System.Web.Http;
+using System.Web.Http.Routing;
 
 namespace Products.WebApi.Controllers
 {
@@ -28,27 +30,62 @@ namespace Products.WebApi.Controllers
         #region Methods
 
         [Route("")]
-        public IEnumerable<Product> Get()
+        public IHttpActionResult Get()
         {
-            return _productsService.GetProducts();
+            return Ok(_productsService.GetProducts());
+        }
+
+        [Route("{id}")]
+        public IHttpActionResult Get(int id)
+        {
+            try
+            {
+                return Ok(_productsService.GetProduct(id));
+            }
+            catch (ArgumentException)
+            {
+                return NotFound();
+            }
         }
 
         [Route("")]
-        public void Post([FromBody]ProductModel p)
+        public async Task<IHttpActionResult> Post([FromBody]ProductModel p)
         {
-            _productsService.InsertProduct(p);
+            Product inserted = await _productsService.InsertProduct(p);
+
+            UrlHelper uriHelper = new UrlHelper(this.Request);
+            uriHelper.Route("Products", inserted.Id);
+
+            //return also link to product
+            return Created(uriHelper.ToString(), inserted);
         }
 
         [Route("{id}")]
-        public void Put(int id, [FromBody]ProductModel p)
+        public IHttpActionResult Put(int id, [FromBody]ProductModel p)
         {
-            _productsService.ModifyProduct(id, p);
+            try
+            {
+                _productsService.ModifyProduct(id, p);
+                return Ok();
+            }
+            catch (ArgumentException)
+            {
+                return NotFound();
+            }
         }
 
         [Route("{id}")]
-        public void Delete(int id)
+        public IHttpActionResult Delete(int id)
         {
-            _productsService.DeleteProduct(id);
+            try
+            {
+                _productsService.DeleteProduct(id);
+                return Ok();
+            }
+            catch (ArgumentException)
+            {
+                return NotFound();
+            }
         }
         #endregion
     }
