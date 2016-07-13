@@ -8,6 +8,9 @@ using System.Web.Http.Tracing;
 
 namespace Products.WebApi.Controllers
 {
+    /// <summary>
+    /// Entry Point for Products API
+    /// </summary>
     [RoutePrefix("Products")]
     public class ProductsController : ApiController
     {
@@ -22,6 +25,9 @@ namespace Products.WebApi.Controllers
 
         #region Constructor
 
+        /// <summary>
+        /// Creates a ProductsController
+        /// </summary>
         public ProductsController()
         {
             _productsService = (IProductsService)GlobalConfiguration.Configuration
@@ -34,6 +40,10 @@ namespace Products.WebApi.Controllers
 
         #region Methods
 
+        /// <summary>
+        /// Returns all products
+        /// </summary>
+        /// <returns></returns>
         [Route("")]
         public IHttpActionResult Get()
         {
@@ -41,6 +51,11 @@ namespace Products.WebApi.Controllers
             return Ok(_productsService.GetProducts());
         }
 
+        /// <summary>
+        /// Returns Product with specified Id if present, Not Found otherwise
+        /// </summary>
+        /// <param name="id">Id of the product</param>
+        /// <returns>Ok or NotFound if success or fail</returns>
         [Route("{id}")]
         public IHttpActionResult Get(int id)
         {
@@ -56,6 +71,12 @@ namespace Products.WebApi.Controllers
             }
         }
 
+        /// <summary>
+        /// Allows to inser a product: the ID and last modified properties will be taken care of automatically.
+        /// NB: to insert image POST to Products/Images/{id}
+        /// </summary>
+        /// <param name="p">The Product's data</param>
+        /// <returns>Ok if succeeded</returns>
         [Route("")]
         public IHttpActionResult Post([FromBody]ProductModel p)
         {
@@ -64,6 +85,12 @@ namespace Products.WebApi.Controllers
             return Ok();
         }
 
+        /// <summary>
+        /// Modify existing product with specified ID
+        /// </summary>
+        /// <param name="id">The id of the product</param>
+        /// <param name="p">Product data</param>
+        /// <returns>Ok or NotFound in case of success or fail</returns>
         [Route("{id}")]
         public IHttpActionResult Put(int id, [FromBody]ProductModel p)
         {
@@ -80,6 +107,11 @@ namespace Products.WebApi.Controllers
             }
         }
 
+        /// <summary>
+        /// Deletes product with specified ID
+        /// </summary>
+        /// <param name="id">The id of the product</param>
+        /// <returns> Ok if deleted or NotFound in case of invalid ID (fail)</returns>
         [Route("{id}")]
         public IHttpActionResult Delete(int id)
         {
@@ -96,6 +128,13 @@ namespace Products.WebApi.Controllers
             }
         }
 
+        /// <summary>
+        /// Allows to insert and/or modify the image for a product
+        /// </summary>
+        /// <param name="id">The product ID</param>
+        /// <param name="buffer">The raa bytes of the image</param>
+        /// <returns>Ok if succeeded, BadRequest if buffer fails to be converted to an image, not found if ID is 
+        /// non valid</returns>
         [Route("Images/{id}")]
         public IHttpActionResult Put(int id, [FromBody]byte[] buffer)
         {
