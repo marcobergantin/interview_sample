@@ -4,8 +4,14 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Products.Client"
+        xmlns:converters="clr-namespace:Products.Client.Converters"
         mc:Ignorable="d"
-        Title="MainWindow" Height="350" Width="525">
+        Title="Products" Height="350" Width="525">
+
+    <Window.Resources>
+        <converters:BinaryImageConverter x:Key="imgConverter" />
+    </Window.Resources>
+
     <Grid>
 
         <Grid.ColumnDefinitions>
@@ -29,12 +35,27 @@
             <ListBox.ItemTemplate>
                 <DataTemplate>
 
-                    <StackPanel Background="AliceBlue">
-                        <TextBlock Text="{Binding Id}" FontStyle="Italic" FontWeight="Light"/>
-                        <TextBlock Text="{Binding Name}" FontWeight="Bold"/>
-                        <TextBlock Text="{Binding Price}"/>
-                    </StackPanel>
-                    
+                    <Grid Background="AliceBlue">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="50"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <Image Grid.Column="0"
+                               MaxWidth="50"
+                               MaxHeight="50"
+                               Margin="0 0 10 0"
+                               Source="{Binding Image, Converter={StaticResource imgConverter}}" 
+                               Stretch="UniformToFill" 
+                               StretchDirection="Both"/>
+
+                        <StackPanel Grid.Column="1">
+                            <TextBlock Text="{Binding Id}" FontStyle="Italic" FontWeight="Light"/>
+                            <TextBlock Text="{Binding Name}" FontWeight="Bold"/>
+                            <TextBlock Text="{Binding Price}"/>
+                        </StackPanel>
+                    </Grid>
+
                 </DataTemplate>
             </ListBox.ItemTemplate>
             

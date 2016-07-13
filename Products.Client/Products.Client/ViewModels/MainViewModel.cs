@@ -122,11 +122,7 @@ namespace Products.Client.ViewModels
                 {
                     string uri = string.Format("Products/{0}", this.SelectedProduct.Id);
                     var response = await _client.PutAsJsonAsync(uri, p);
-                    if (response.IsSuccessStatusCode)
-                    {
-                        // Get the URI of the created resource.
-                        Uri productUrl = response.Headers.Location;
-                    }
+                    this.GetProducts(null); //refresh   
                 }
                 catch (Exception ex)
                 {
@@ -145,11 +141,7 @@ namespace Products.Client.ViewModels
                 try
                 {
                     var response = await _client.PostAsJsonAsync("Products", p);
-                    if (response.IsSuccessStatusCode)
-                    {
-                        // Get the URI of the created resource.
-                        Uri productUrl = response.Headers.Location;
-                    }
+                    this.GetProducts(null); //refresh               
                 }
                 catch (Exception ex)
                 {
@@ -177,20 +169,20 @@ namespace Products.Client.ViewModels
 
         private async void DeleteProduct(object obj)
         {
-            try
-            {
-                string uri = string.Format("Products/{0}", this.SelectedProduct.Id);
-                var response = await _client.DeleteAsync(uri);
-                if (response.IsSuccessStatusCode)
+            if( MessageBox.Show(string.Format("Delete {0}?", this.SelectedProduct.Name), "Products",
+                MessageBoxButton.YesNoCancel, MessageBoxImage.Question) == MessageBoxResult.Yes)
+            { 
+                try
                 {
-                    // Get the URI of the created resource.
-                    Uri productUrl = response.Headers.Location;
+                    string uri = string.Format("Products/{0}", this.SelectedProduct.Id);
+                    var response = await _client.DeleteAsync(uri);
+                    this.GetProducts(null); //refresh   
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.Message, ex.GetType().Name);
                 }
             }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.Message, ex.GetType().Name);
-            }          
         }
 
         private async void InsertImage(object obj)
@@ -206,11 +198,7 @@ namespace Products.Client.ViewModels
             {
                 string uri = string.Format("Products/Images/{0}", this.SelectedProduct.Id);
                 var response = await _client.PutAsJsonAsync(uri, p.Image);
-                if (response.IsSuccessStatusCode)
-                {
-                    // Get the URI of the created resource.
-                    Uri productUrl = response.Headers.Location;
-                }
+                this.GetProducts(null); //refresh   
             }
             catch (Exception ex)
             {
