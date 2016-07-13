@@ -26,10 +26,6 @@ namespace Products.WebApi
                 defaults: new { id = RouteParameter.Optional }
             );
 
-            //use custom logger
-            GlobalConfiguration.Configuration.Services.Replace(
-                typeof(System.Web.Http.Tracing.ITraceWriter), new NLogger());
-
             //Dependency Resolver setup
             IKernel kernel = new StandardKernel(new ResolverModule());
             IDependencyResolver ninjectResolver = new NinjectResolver(kernel);

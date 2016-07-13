@@ -3,13 +3,13 @@ using System.Collections.Generic;
 
 namespace Products.WebApi.Interfaces
 {
-    public interface IProductsService
+    public interface IProductsRepository
     {
-        IEnumerable<Product> GetProducts();
         Product GetProduct(int id);
-        void InsertProduct(ProductModel p);
-        void InsertImageForProduct(int productId, byte[] image);
+        IEnumerable<Product> GetAllProducts();
+        void InsertProduct(Product p);
         void ModifyProduct(int id, ProductModel p);
         void DeleteProduct(int id);
+        void InsertImageForProduct(int id, byte[] buffer);
     }
 }

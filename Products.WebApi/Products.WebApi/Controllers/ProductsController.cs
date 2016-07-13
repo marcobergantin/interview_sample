@@ -28,12 +28,10 @@ namespace Products.WebApi.Controllers
         /// <summary>
         /// Creates a ProductsController
         /// </summary>
-        public ProductsController()
+        public ProductsController(IProductsService productsService, ITraceWriter tracer)
         {
-            _productsService = (IProductsService)GlobalConfiguration.Configuration
-                                                                    .DependencyResolver
-                                                                    .GetService(typeof(IProductsService));
-            _tracer = GlobalConfiguration.Configuration.Services.GetTraceWriter();
+            _productsService = productsService;
+            _tracer = tracer;
         }
 
         #endregion

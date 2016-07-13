@@ -2,24 +2,22 @@
 using Products.WebApi.Interfaces;
 using Products.WebApi.Models;
 using System;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Products.WebApi.Services
 {
-    public class EFProductsService : IProductsService
+    public class ProductsService : IProductsService
     {
         #region Fields
 
-        ProductsContext _productsContext;
+        IProductsRepository _repository;
 
         #endregion
 
         #region Constructor
 
-        public EFProductsService()
+        public ProductsService(IProductsRepository repository)
         {
-            _productsContext = new ProductsContext();
+            _repository = repository;
         }
 
         #endregion
@@ -28,18 +26,12 @@ namespace Products.WebApi.Services
 
         public IEnumerable<Product> GetProducts()
         {
-            List<Product> products = new List<Product>();
-            foreach (var p in _productsContext.ProductSet)
-            {
-                products.Add(p);
-            }
-
-            return products;
+            return _repository.GetAllProducts();
         }
 
         public Product GetProduct(int id)
         {
-            Product dbEntry = this.GetProductFromDB(id);
+            Product dbEntry = _repository.GetProduct(id);
             if (dbEntry != null)
             {
                 return dbEntry;
@@ -50,80 +42,37 @@ namespace Products.WebApi.Services
             }
         }
 
-        public async void InsertProduct(ProductModel p)
+        public void InsertProduct(ProductModel p)
         {
+            //id will be taken care of by repository
             Product product = new Product()
             {
-                Id = _productsContext.ProductSet.Count(),
                 Name = p.Name,
                 Price = p.Price,
                 LastUpdated = DateTime.Now
             };
 
-            _productsContext.ProductSet.Add(product);
-            await _productsContext.SaveChangesAsync();
+             _repository.InsertProduct(product);
         }
 
-        public async void ModifyProduct(int id, ProductModel product)
+        public void ModifyProduct(int id, ProductModel product)
         {
-            Product dbEntry = this.GetProductFromDB(id);
-            if (dbEntry != null)
-            {
-                dbEntry.Name = product.Name;
-                dbEntry.Price = product.Price;
-                dbEntry.LastUpdated = DateTime.Now;
-
-                await _productsContext.SaveChangesAsync();
-            }
-            else
-            {
-                throw new ArgumentException(this.ProductNotFoundMessage(id));
-            }
+            _repository.ModifyProduct(id, product);
         }
 
-        public async void DeleteProduct(int id)
+        public void DeleteProduct(int id)
         {
-            Product dbEntry = this.GetProductFromDB(id);
-            if (dbEntry != null)
-            {
-                _productsContext.ProductSet.Remove(dbEntry);
-                await _productsContext.SaveChangesAsync();
-            }
-            else
-            {
-                throw new ArgumentException(this.ProductNotFoundMessage(id));
-            }
+            _repository.DeleteProduct(id);
         }
 
-        public async void InsertImageForProduct(int productId, byte[] image)
+        public void InsertImageForProduct(int productId, byte[] image)
         {
-            Product dbEntry = this.GetProductFromDB(productId);
-            if (dbEntry != null)
-            {
-                await this.InsertImageForProduct(dbEntry, image);
-            }
-            else
-            {
-                throw new ArgumentException(this.ProductNotFoundMessage(productId));
-            }
-        }
-
-        private async Task<int> InsertImageForProduct(Product product, byte[] image)
-        {
-            product.Image = image;
-            product.LastUpdated = DateTime.Now;
-            return await _productsContext.SaveChangesAsync();
+            _repository.InsertImageForProduct(productId, image);
         }
 
         #endregion
 
         #region Utils
-
-        private Product GetProductFromDB(int id)
-        {
-            return _productsContext.ProductSet.Where(p => p.Id == id)
-                                                         .FirstOrDefault();
-        }
 
         private string ProductNotFoundMessage(int id)
         {
