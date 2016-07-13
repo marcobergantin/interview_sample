@@ -4,6 +4,7 @@ using Products.Client.Views;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Configuration;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Windows;
@@ -93,7 +94,7 @@ namespace Products.Client.ViewModels
         {
             _client = new HttpClient()
             {
-                BaseAddress = new Uri("http://localhost:51160/")
+                BaseAddress = new Uri(ConfigurationManager.AppSettings["ServerURI"])
             };
 
             _client.DefaultRequestHeaders.Accept.Clear();
