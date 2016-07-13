@@ -6,7 +6,7 @@
         xmlns:converters="clr-namespace:Products.Client.Converters"
         xmlns:local="clr-namespace:Products.Client.Views"
         mc:Ignorable="d"
-        Title="ProductPropertiesView" Height="300" Width="300">
+        Title="ProductPropertiesView" Height="350" Width="300">
 
     <Window.Resources>
         <converters:BinaryImageConverter x:Key="imgConverter" />
@@ -14,7 +14,10 @@
 
     <StackPanel>
 
-        <Image Source="{Binding Path=Product.Image, Converter={StaticResource imgConverter}}" 
+        <Image 
+               MaxWidth="300"
+               MaxHeight="200"
+               Source="{Binding Path=Product.Image, Converter={StaticResource imgConverter}}" 
                Stretch="UniformToFill" 
                StretchDirection="Both">
             <Image.BitmapEffect>

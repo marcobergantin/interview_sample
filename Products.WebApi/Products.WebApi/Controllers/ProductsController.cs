@@ -111,7 +111,7 @@ namespace Products.WebApi.Controllers
                 }
                 else
                 {
-                    _tracer.Error(Request, _loggerCategory, "Couldn't parse img", null);
+                    _tracer.Error(Request, _loggerCategory, "Couldn't parse img", new string[] { });
                     return BadRequest();
                 }
             }
