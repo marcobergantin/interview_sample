@@ -111,6 +111,7 @@ namespace Products.WebApi.Services
         private async Task<int> InsertImageForProduct(Product product, byte[] image)
         {
             product.Image = image;
+            product.LastUpdated = DateTime.Now;
             return await _productsContext.SaveChangesAsync();
         }
 
