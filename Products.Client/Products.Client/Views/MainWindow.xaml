@@ -13,7 +13,12 @@
     </Window.Resources>
 
     <Grid>
-        
+
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="25"/>
+        </Grid.RowDefinitions>        
+
         <Grid.ColumnDefinitions>
             <ColumnDefinition/>
             <ColumnDefinition/>
@@ -29,6 +34,7 @@
         
         <ListBox 
             Grid.Column="1"
+            Grid.RowSpan="2"
             ItemsSource="{Binding Products}"
             SelectedItem="{Binding SelectedProduct}">
 
@@ -60,5 +66,7 @@
             </ListBox.ItemTemplate>
             
         </ListBox>
+        
+        <Label Grid.Row="1" Content="{Binding StatusString}"/>
     </Grid>
 </Window>

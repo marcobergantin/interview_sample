@@ -17,18 +17,17 @@ namespace Products.WebApi.Services
 
         public async Task<IEnumerable<Product>> GetAll()
         {
-            // here we should implement paging otherwise as soon as the number of products is going to increase
-            // the database is not going to be happy
+            /*possible improvement: implement paging to reduce load on the DB and network traffic.
+              needs another type definition, in which also the total count, page number and size are specified
+              another good practice would be including in the response also the links to the previous and next pages*/
 
             var products = await _context.ProductSet.ToListAsync();
-
             return products;
         }
 
         public async Task<Product> GetById(int id)
         {
             var product = await GetProductFromDbById(id);
-
             return product;
         }
 

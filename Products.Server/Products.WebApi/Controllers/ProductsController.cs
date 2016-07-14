@@ -51,7 +51,6 @@ namespace Products.WebApi.Controllers
             try
             {
                 this.TraceRequest();
-
                 return Ok(await _productsService.GetProducts());
             }
             catch (Exception ex)
@@ -74,7 +73,6 @@ namespace Products.WebApi.Controllers
             {
                 this.TraceRequest();
                 var product = await _productsService.GetProduct(id);
-
                 if (product == null)
                 {
                     return NotFound();
@@ -102,7 +100,6 @@ namespace Products.WebApi.Controllers
             try
             {
                 this.TraceRequest();
-
                 await _productsService.InsertProduct(product);
                 return Ok();
             }
@@ -186,11 +183,9 @@ namespace Products.WebApi.Controllers
             try
             {
                 this.TraceRequest();
-
                 using (var memoryStream = new MemoryStream(buffer))
                 {
                     Image image = Image.FromStream(memoryStream);
-
                     if (image != null)
                     {
                         //image parsed successfully

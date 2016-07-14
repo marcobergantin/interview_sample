@@ -14,6 +14,12 @@ namespace Products.Client.ViewModels
 {
     public class MainViewModel : BaseViewModel
     {
+        #region Constants
+
+        const string IDLE_STATUS_STRING = "Ready";
+
+        #endregion
+
         #region Fields
 
         private HttpClient _client;
@@ -32,6 +38,20 @@ namespace Products.Client.ViewModels
         {
             get;
             set;
+        }
+
+        private string _statusString;
+        public string StatusString
+        {
+            get { return _statusString; }
+            private set
+            {
+                if (value.Equals(_statusString) == false)
+                {
+                    _statusString = value;
+                    NotifyPropertyChanged(nameof(StatusString));
+                }
+            }
         }
 
         #endregion
@@ -106,6 +126,28 @@ namespace Products.Client.ViewModels
 
         #region Methods
 
+        private async void GetProducts(object obj)
+        {
+            try
+            {
+                this.StatusString = "Fetching all products...";
+                HttpResponseMessage response = await _client.GetAsync("products");
+                if (response.IsSuccessStatusCode)
+                {                   
+                    this.Products = await response.Content.ReadAsAsync<IEnumerable<Product>>();
+                    this.NotifyPropertyChanged(nameof(this.Products));                  
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, ex.GetType().Name);
+            }
+            finally
+            {
+                this.StatusString = IDLE_STATUS_STRING;
+            }
+        }
+
         private async void ModifyProduct(object obj)
         {
             ProductViewModel p = new ProductViewModel()
@@ -121,13 +163,27 @@ namespace Products.Client.ViewModels
             {
                 try
                 {
+                    this.StatusString = "Mofifying product...";
                     string uri = string.Format("Products/{0}", this.SelectedProduct.Id);
                     var response = await _client.PutAsJsonAsync(uri, p);
+                    if (response.IsSuccessStatusCode)
+                    {
+                        MessageBox.Show("Product Modified");
+                    }
+                    else
+                    {
+                        MessageBox.Show("Couldn't modify " + p.Name);
+                    }
+
                     this.GetProducts(null); //refresh   
                 }
                 catch (Exception ex)
                 {
                     MessageBox.Show(ex.Message, ex.GetType().Name);
+                }
+                finally
+                {
+                    this.StatusString = IDLE_STATUS_STRING;
                 }
             }
         }
@@ -141,30 +197,27 @@ namespace Products.Client.ViewModels
             {
                 try
                 {
+                    this.StatusString = "Inserting Product...";
                     var response = await _client.PostAsJsonAsync("Products", p);
-                    this.GetProducts(null); //refresh               
+                    if (response.IsSuccessStatusCode)
+                    {
+                        MessageBox.Show("Product Inserted");
+                    }
+                    else
+                    {
+                        MessageBox.Show("Couldn't insert " + p.Name);
+                    }
+
+                    this.GetProducts(null); //refresh  
                 }
                 catch (Exception ex)
                 {
                     MessageBox.Show(ex.Message, ex.GetType().Name);
                 }
-            }
-        }
-
-        private async void GetProducts(object obj)
-        {
-            try
-            {
-                HttpResponseMessage response = await _client.GetAsync("products");
-                if (response.IsSuccessStatusCode)
+                finally
                 {
-                    this.Products = await response.Content.ReadAsAsync<IEnumerable<Product>>();
-                    this.NotifyPropertyChanged(nameof(this.Products));
+                    this.StatusString = IDLE_STATUS_STRING;
                 }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.Message, ex.GetType().Name);
             }
         }
 
@@ -175,13 +228,27 @@ namespace Products.Client.ViewModels
             { 
                 try
                 {
+                    this.StatusString = "Deleting Product...";
                     string uri = string.Format("Products/{0}", this.SelectedProduct.Id);
                     var response = await _client.DeleteAsync(uri);
+                    if (response.IsSuccessStatusCode)
+                    {
+                        MessageBox.Show("Product Deleted");
+                    }
+                    else
+                    {
+                        MessageBox.Show("Couldn't delete " + this.SelectedProduct.Name);
+                    }
+
                     this.GetProducts(null); //refresh   
                 }
                 catch (Exception ex)
                 {
                     MessageBox.Show(ex.Message, ex.GetType().Name);
+                }
+                finally
+                {
+                    this.StatusString = IDLE_STATUS_STRING;
                 }
             }
         }
@@ -197,16 +264,29 @@ namespace Products.Client.ViewModels
             p.CmdInsertImage.Execute(null);
             try
             {
+                this.StatusString = "Updating image...";
                 string uri = string.Format("Products/Images/{0}", this.SelectedProduct.Id);
                 var response = await _client.PutAsJsonAsync(uri, p.Image);
+                if (response.IsSuccessStatusCode)
+                {
+                    MessageBox.Show("Image updated for " + this.SelectedProduct.Name);
+                }
+                else
+                {
+                    MessageBox.Show("Couldn't update Image for " + this.SelectedProduct.Name);
+                }
+
                 this.GetProducts(null); //refresh   
             }
             catch (Exception ex)
             {
                 MessageBox.Show(ex.Message, ex.GetType().Name);
-            }   
+            }
+            finally
+            {
+                this.StatusString = IDLE_STATUS_STRING;
+            }
         }
-
 
         public void Dispose()
         {
