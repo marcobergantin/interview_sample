@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace Products.WebApi.Interfaces
+namespace Products.WebApi.Contracts
 {
     public interface IProductsRepository
     {

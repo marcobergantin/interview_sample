@@ -1,8 +1,7 @@
 ﻿using System.Collections.Generic;
-using Products.WebApi.Interfaces;
+using Products.WebApi.Contracts;
 using Products.WebApi.Models;
 using System;
-using System.Linq;
 using System.Threading.Tasks;
 using Products.WebApi.Exceptions;
 

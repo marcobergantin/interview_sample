@@ -1,10 +1,8 @@
-﻿using Products.WebApi.Interfaces;
-using System;
+﻿using Products.WebApi.Contracts;
 using System.Collections.Generic;
 using System.Data.Entity;
 using System.Linq;
 using System.Threading.Tasks;
-using Products.WebApi.Models;
 
 namespace Products.WebApi.Services
 {

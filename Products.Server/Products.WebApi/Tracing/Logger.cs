@@ -1,15 +1,17 @@
-﻿using NLog;
+﻿using Products.WebApi.Contracts;
 using System;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Text;
+using System.Web.Http;
 using System.Web.Http.Tracing;
 
 namespace Products.WebApi.Logging
 {
-    public sealed class NLogger : ITraceWriter
+    public sealed class Logger : ITraceWriter
     {
-        private static readonly Logger classLogger = LogManager.GetCurrentClassLogger();
+        private static readonly IProductsLogger classLogger = (IProductsLogger)(GlobalConfiguration.Configuration.
+                                                                DependencyResolver.GetService(typeof(IProductsLogger)));
 
         private static readonly Lazy<Dictionary<TraceLevel, Action<string>>> loggingMap =
             new Lazy<Dictionary<TraceLevel, Action<string>>>(() => new Dictionary<TraceLevel, Action<string>>
@@ -21,7 +23,7 @@ namespace Products.WebApi.Logging
                     {TraceLevel.Warn, classLogger.Warn}
                 });
 
-        private Dictionary<TraceLevel, Action<string>> Logger
+        private Dictionary<TraceLevel, Action<string>> LoggerActionsMap
         {
             get { return loggingMap.Value; }
         }
@@ -61,7 +63,7 @@ namespace Products.WebApi.Logging
             if (record.Exception != null && !string.IsNullOrWhiteSpace(record.Exception.GetBaseException().Message))
                 message.Append(" ").Append(record.Exception.GetBaseException().Message);
 
-            Logger[record.Level](message.ToString());
+            LoggerActionsMap[record.Level](message.ToString());
         }
     }
 }
