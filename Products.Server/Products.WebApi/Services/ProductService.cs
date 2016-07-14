@@ -2,6 +2,9 @@
 using Products.WebApi.Interfaces;
 using Products.WebApi.Models;
 using System;
+using System.Linq;
+using System.Threading.Tasks;
+using Products.WebApi.Exceptions;
 
 namespace Products.WebApi.Services
 {
@@ -24,59 +27,120 @@ namespace Products.WebApi.Services
 
         #region IProductsService Implements
 
-        public IEnumerable<Product> GetProducts()
+        public async Task<IEnumerable<ViewProductDto>> GetProducts()
         {
-            return _repository.GetAllProducts();
+            var products = new List<ViewProductDto>();
+
+            foreach (var p in await _repository.GetAll())
+            {
+                products.Add(MapProductToViewProductDto(p));
+            }
+
+            return products;
         }
 
-        public Product GetProduct(int id)
+        public async Task<ViewProductDto> GetProduct(int id)
         {
-            Product dbEntry = _repository.GetProduct(id);
-            if (dbEntry != null)
-            {
-                return dbEntry;
-            }
-            else
-            {
-                throw new ArgumentException(this.ProductNotFoundMessage(id));
-            }
+            var product = await _repository.GetById(id);
+
+            return MapProductToViewProductDto(product);
         }
 
-        public void InsertProduct(ProductModel p)
+        public async Task InsertProduct(AddEditProductDto productToInsert)
         {
+            ValidateProductModel(productToInsert);
+
             //id will be taken care of by repository
             Product product = new Product()
             {
-                Name = p.Name,
-                Price = p.Price,
+                Name = productToInsert.Name,
+                Price = productToInsert.Price,
                 LastUpdated = DateTime.Now
             };
 
-             _repository.InsertProduct(product);
+            await _repository.Add(product);
         }
 
-        public void ModifyProduct(int id, ProductModel product)
+        public async Task ModifyProduct(int id, AddEditProductDto product)
         {
-            _repository.ModifyProduct(id, product);
+            this.ValidateProductModel(product);
+            Product dbProduct = await _repository.GetById(id);
+
+            if (dbProduct == null)
+            {
+                throw new ProductNotFoundException(String.Format("Product with id {0} not found.", id));
+            }
+
+            dbProduct.Name = product.Name;
+            dbProduct.Price = product.Price;
+            dbProduct.LastUpdated = DateTime.Now;
+
+            await _repository.Update(dbProduct);
         }
 
-        public void DeleteProduct(int id)
+        public async Task DeleteProduct(int id)
         {
-            _repository.DeleteProduct(id);
+            var dbProduct = await _repository.GetById(id);
+
+            if (dbProduct == null)
+            {
+                throw new ProductNotFoundException(String.Format("Product with id {0} not found.", id));
+            }
+
+            await _repository.Delete(dbProduct);
         }
 
-        public void InsertImageForProduct(int productId, byte[] image)
+        public async Task InsertImageForProduct(int productId, byte[] image)
         {
-            _repository.InsertImageForProduct(productId, image);
+            Product dbProduct = await _repository.GetById(productId);
+
+            if (dbProduct == null)
+            {
+                throw new ProductNotFoundException(String.Format("Product with id {0} not found.", productId));
+            }
+
+            dbProduct.Image = image;
+            dbProduct.LastUpdated = DateTime.Now;
+
+            await _repository.Update(dbProduct);
         }
 
         #endregion
 
         #region Utils
 
-        private string ProductNotFoundMessage(int id)
+        // This method is marked as internal for testing purpose, a validation framework should be used and injected to the service.
+        internal void ValidateProductModel(AddEditProductDto product)
         {
-            return "No element found with ID = " + id;
+            if (product == null)
+            {
+                throw new ArgumentNullException("product");
+            }
+
+            if (String.IsNullOrWhiteSpace(product.Name))
+            {
+                throw new ArgumentNullException("Name can't be empty.");
+            }
+
+            if (product.Price < 0)
+            {
+                throw new ArgumentOutOfRangeException("Price can't be less than zero.");
+            }
+        }
+
+        // A library like Automapper should be used for mapping, or also a "home-made" framework is fine, but an interface should be
+        // passed to the service so we can unit test it better. This method is marked as internal so we can test it.
+        internal ViewProductDto MapProductToViewProductDto(Product product)
+        {
+            var dto = new ViewProductDto()
+            {
+                Id = product.Id,
+                Price = product.Price,
+                Image = product.Image,
+                Name = product.Name
+            };
+
+            return dto;
         }
 
         #endregion

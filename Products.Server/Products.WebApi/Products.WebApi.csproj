@@ -138,11 +138,13 @@
     <Compile Include="Contracts\IProductsRepository.cs" />
     <Compile Include="Contracts\IProductsService.cs" />
     <Compile Include="Controllers\ProductsController.cs" />
+    <Compile Include="Exceptions\ProductNotFoundException.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
     <Compile Include="IoC\ResolverModule.cs" />
-    <Compile Include="Models\ProductModel.cs" />
+    <Compile Include="Models\AddEditProductDto.cs" />
+    <Compile Include="Models\ViewProductDto.cs" />
     <Compile Include="Product.cs">
       <DependentUpon>ProductModel.tt</DependentUpon>
     </Compile>

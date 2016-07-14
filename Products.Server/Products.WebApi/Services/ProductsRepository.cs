@@ -1,7 +1,9 @@
 ﻿using Products.WebApi.Interfaces;
 using System;
 using System.Collections.Generic;
+using System.Data.Entity;
 using System.Linq;
+using System.Threading.Tasks;
 using Products.WebApi.Models;
 
 namespace Products.WebApi.Services
@@ -15,66 +17,46 @@ namespace Products.WebApi.Services
             _context = new ProductModelContainer();
         }
 
-        public IEnumerable<Product> GetAllProducts()
+        public async Task<IEnumerable<Product>> GetAll()
         {
-            List<Product> products = new List<Product>();
-            foreach (var p in _context.ProductSet)
-            {
-                products.Add(p);
-            }
+            // here we should implement paging otherwise as soon as the number of products is going to increase
+            // the database is not going to be happy
+
+            var products = await _context.ProductSet.ToListAsync();
 
             return products;
         }
 
-        public Product GetProduct(int id)
+        public async Task<Product> GetById(int id)
         {
-            return this.GetProductFromDB(id);
+            var product = await GetProductFromDbById(id);
+
+            return product;
         }
 
-        public async void InsertProduct(Product p)
+        public async Task Add(Product p)
         {
             _context.ProductSet.Add(p);
             await _context.SaveChangesAsync();
         }
 
-        public async void ModifyProduct(int id, ProductModel p)
+        public async Task Update(Product p)
         {
-            Product dbEntry = this.GetProductFromDB(id);
-            if (dbEntry != null)
-            {
-                dbEntry.Name = p.Name;
-                dbEntry.Price = p.Price;
-                dbEntry.LastUpdated = DateTime.Now;
-
-                await _context.SaveChangesAsync();
-            }
+            _context.Entry(p).State = EntityState.Modified;
+            await _context.SaveChangesAsync();
         }
 
-        public async void DeleteProduct(int id)
+        public async Task Delete(Product product)
         {
-            Product dbEntry = this.GetProductFromDB(id);
-            if (dbEntry != null)
-            {
-                _context.ProductSet.Remove(dbEntry);
-                await _context.SaveChangesAsync();
-            }
+            _context.ProductSet.Remove(product);
+            await _context.SaveChangesAsync();
         }
 
-        public async void InsertImageForProduct(int id, byte[] buffer)
+        private async Task<Product> GetProductFromDbById(int id)
         {
-            Product product = this.GetProductFromDB(id);
-            if (product != null)
-            {
-                product.Image = buffer;
-                product.LastUpdated = DateTime.Now;
-                await _context.SaveChangesAsync();
-            }
-        }
+            var product = (await _context.ProductSet.Where(x => x.Id == id).ToListAsync()).FirstOrDefault();
 
-        private Product GetProductFromDB(int id)
-        {
-            return _context.ProductSet.Where(p => p.Id == id)
-                                                         .FirstOrDefault();
+            return product;
         }
     }
 }

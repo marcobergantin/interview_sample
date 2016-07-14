@@ -53,8 +53,6 @@
                             <TextBlock Text="{Binding Id}" FontStyle="Italic" FontWeight="Light"/>
                             <TextBlock Text="{Binding Name}" FontWeight="Bold"/>
                             <TextBlock Text="{Binding Price}"/>
-                            <TextBlock Text="{Binding LastUpdated, StringFormat=HH:MM dd/MM/yyyy}"
-                                       FontWeight="ExtraLight"/>
                         </StackPanel>
                     </Grid>
 

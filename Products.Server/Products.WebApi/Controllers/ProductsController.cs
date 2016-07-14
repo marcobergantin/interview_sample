@@ -3,8 +3,10 @@ using Products.WebApi.Models;
 using System;
 using System.Drawing;
 using System.IO;
+using System.Threading.Tasks;
 using System.Web.Http;
 using System.Web.Http.Tracing;
+using Products.WebApi.Exceptions;
 
 namespace Products.WebApi.Controllers
 {
@@ -43,10 +45,20 @@ namespace Products.WebApi.Controllers
         /// </summary>
         /// <returns></returns>
         [Route("")]
-        public IHttpActionResult Get()
+        [HttpGet]
+        public async Task<IHttpActionResult> Get()
         {
-            this.TraceRequest();
-            return Ok(_productsService.GetProducts());
+            try
+            {
+                this.TraceRequest();
+
+                return Ok(await _productsService.GetProducts());
+            }
+            catch (Exception ex)
+            {
+                _tracer.Error(Request, _loggerCategory, ex);
+                return InternalServerError(ex);
+            }
         }
 
         /// <summary>
@@ -55,17 +67,25 @@ namespace Products.WebApi.Controllers
         /// <param name="id">Id of the product</param>
         /// <returns>Ok or NotFound if success or fail</returns>
         [Route("{id}")]
-        public IHttpActionResult Get(int id)
+        [HttpGet]
+        public async Task<IHttpActionResult> Get(int id)
         {
             try
             {
                 this.TraceRequest();
-                return Ok(_productsService.GetProduct(id));
+                var product = await _productsService.GetProduct(id);
+
+                if (product == null)
+                {
+                    return NotFound();
+                }
+
+                return Ok(product);
             }
-            catch (ArgumentException ex)
+            catch (Exception ex)
             {
                 _tracer.Error(Request, _loggerCategory, ex);
-                return NotFound();
+                return InternalServerError(ex);
             }
         }
 
@@ -73,35 +93,56 @@ namespace Products.WebApi.Controllers
         /// Allows to inser a product: the ID and last modified properties will be taken care of automatically.
         /// NB: to insert image POST to Products/Images/{id}
         /// </summary>
-        /// <param name="p">The Product's data</param>
+        /// <param name="product">The Product's data</param>
         /// <returns>Ok if succeeded</returns>
         [Route("")]
-        public IHttpActionResult Post([FromBody]ProductModel p)
+        [HttpPost]
+        public async Task<IHttpActionResult> Post([FromBody]AddEditProductDto product)
         {
-            this.TraceRequest();
-            _productsService.InsertProduct(p);
-            return Ok();
+            try
+            {
+                this.TraceRequest();
+
+                await _productsService.InsertProduct(product);
+                return Ok();
+            }
+            catch (ArgumentException ex)
+            {
+                _tracer.Error(Request, _loggerCategory, ex);
+                return BadRequest(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                _tracer.Error(Request, _loggerCategory, ex);
+                return InternalServerError(ex);
+            }
         }
 
         /// <summary>
         /// Modify existing product with specified ID
         /// </summary>
         /// <param name="id">The id of the product</param>
-        /// <param name="p">Product data</param>
+        /// <param name="product">Product data</param>
         /// <returns>Ok or NotFound in case of success or fail</returns>
         [Route("{id}")]
-        public IHttpActionResult Put(int id, [FromBody]ProductModel p)
+        [HttpPut]
+        public async Task<IHttpActionResult> Put(int id, [FromBody]AddEditProductDto product)
         {
             try
             {
                 this.TraceRequest();
-                _productsService.ModifyProduct(id, p);
+                await _productsService.ModifyProduct(id, product);
                 return Ok();
             }
             catch (ArgumentException ex)
             {
                 _tracer.Error(Request, _loggerCategory, ex);
                 return NotFound();
+            }
+            catch (Exception ex)
+            {
+                _tracer.Error(Request, _loggerCategory, ex);
+                return InternalServerError(ex);
             }
         }
 
@@ -111,18 +152,23 @@ namespace Products.WebApi.Controllers
         /// <param name="id">The id of the product</param>
         /// <returns> Ok if deleted or NotFound in case of invalid ID (fail)</returns>
         [Route("{id}")]
-        public IHttpActionResult Delete(int id)
+        [HttpDelete]
+        public async Task<IHttpActionResult> Delete(int id)
         {
             try
             {
                 this.TraceRequest();
-                _productsService.DeleteProduct(id);
+                await _productsService.DeleteProduct(id);
                 return Ok();
             }
-            catch (ArgumentException ex)
+            catch (ProductNotFoundException)
+            {
+                return NotFound();
+            }
+            catch (Exception ex)
             {
                 _tracer.Error(Request, _loggerCategory, ex);
-                return NotFound();
+                return InternalServerError(ex);
             }
         }
 
@@ -134,28 +180,45 @@ namespace Products.WebApi.Controllers
         /// <returns>Ok if succeeded, BadRequest if buffer fails to be converted to an image, not found if ID is 
         /// non valid</returns>
         [Route("Images/{id}")]
-        public IHttpActionResult Put(int id, [FromBody]byte[] buffer)
+        [HttpPut]
+        public async Task<IHttpActionResult> Put(int id, [FromBody]byte[] buffer)
         {
             try
             {
                 this.TraceRequest();
-                Image image = Image.FromStream(new MemoryStream(buffer));
-                if (image != null)
+
+                using (var memoryStream = new MemoryStream(buffer))
                 {
-                    //image parsed successfully
-                    _productsService.InsertImageForProduct(id, buffer);
-                    return Ok();
+                    Image image = Image.FromStream(memoryStream);
+
+                    if (image != null)
+                    {
+                        //image parsed successfully
+                        await _productsService.InsertImageForProduct(id, buffer);
+                        return Ok();
+                    }
+                    else
+                    {
+                        _tracer.Error(Request, _loggerCategory, "Couldn't parse img", new string[] { });
+                        return BadRequest();
+                    }
+
                 }
-                else
-                {
-                    _tracer.Error(Request, _loggerCategory, "Couldn't parse img", new string[] { });
-                    return BadRequest();
-                }
+
             }
             catch (ArgumentException ex)
             {
                 _tracer.Error(Request, _loggerCategory, ex);
+                return BadRequest(ex.Message);
+            }
+            catch (ProductNotFoundException)
+            {
                 return NotFound();
+            }
+            catch (Exception ex)
+            {
+                _tracer.Error(Request, _loggerCategory, ex);
+                return InternalServerError(ex);
             }
         }
 
