@@ -2,6 +2,7 @@
 using Products.WebApi.IoC;
 using System.Web.Http;
 using System.Web.Http.Dependencies;
+using System.Web.Http.Tracing;
 using WebApiContrib.IoC.Ninject;
 
 namespace Products.WebApi
@@ -27,6 +28,8 @@ namespace Products.WebApi
 
             GlobalConfiguration.Configuration.DependencyResolver = ninjectResolver;
 
+            GlobalConfiguration.Configuration.Services.Replace(typeof(ITraceWriter),
+                (ITraceWriter)(GlobalConfiguration.Configuration.DependencyResolver.GetService(typeof(ITraceWriter))));
         }
     }
 }

@@ -15,7 +15,6 @@ namespace Products.WebApi.IoC
             Bind<ITraceWriter>().To<Logger>();
             Bind<IProductsRepository>().To<ProductsRepository>();
             Bind<IProductsService>().To<ProductsService>();
-            //Bind<ProductsController>();
         }
     }
 }

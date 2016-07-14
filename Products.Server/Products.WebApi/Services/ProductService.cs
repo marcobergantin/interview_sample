@@ -12,14 +12,16 @@ namespace Products.WebApi.Services
         #region Fields
 
         IProductsRepository _repository;
+        IProductsLogger _logger;
 
         #endregion
 
         #region Constructor
 
-        public ProductsService(IProductsRepository repository)
+        public ProductsService(IProductsRepository repository, IProductsLogger logger)
         {
             _repository = repository;
+            _logger = logger;
         }
 
         #endregion
@@ -30,19 +32,32 @@ namespace Products.WebApi.Services
         {
             var products = new List<ViewProductDto>();
 
+            _logger.Info("Getting all products");
             foreach (var p in await _repository.GetAll())
             {
                 products.Add(MapProductToViewProductDto(p));
             }
+
+            _logger.Info(string.Format("Retrieved {0} items", products.Count));
 
             return products;
         }
 
         public async Task<ViewProductDto> GetProduct(int id)
         {
-            var product = await _repository.GetById(id);
+            _logger.Info(string.Format("Getting product with id {0}", id.ToString()));
 
-            return MapProductToViewProductDto(product);
+            var product = await _repository.GetById(id);
+            if (product == null)
+            {
+                _logger.Warn("Not found");
+                throw new ProductNotFoundException(String.Format("Product with id {0} not found.", id));
+            }
+            else
+            {
+                _logger.Info("Found");
+                return MapProductToViewProductDto(product);
+            }          
         }
 
         public async Task InsertProduct(AddEditProductDto productToInsert)
@@ -57,16 +72,19 @@ namespace Products.WebApi.Services
                 LastUpdated = DateTime.Now
             };
 
+            _logger.Info(string.Format("Inserting new product {0}", product.Name));
             await _repository.Add(product);
         }
 
         public async Task ModifyProduct(int id, AddEditProductDto product)
         {
             this.ValidateProductModel(product);
-            Product dbProduct = await _repository.GetById(id);
+            _logger.Info(string.Format("Getting product with id {0} in order to modify it", id.ToString()));
 
+            Product dbProduct = await _repository.GetById(id);
             if (dbProduct == null)
             {
+                _logger.Warn("Not Found");
                 throw new ProductNotFoundException(String.Format("Product with id {0} not found.", id));
             }
 
@@ -74,33 +92,39 @@ namespace Products.WebApi.Services
             dbProduct.Price = product.Price;
             dbProduct.LastUpdated = DateTime.Now;
 
+            _logger.Info(string.Format("Update product {0}", id.ToString()));
             await _repository.Update(dbProduct);
         }
 
         public async Task DeleteProduct(int id)
         {
+            _logger.Info(string.Format("Getting product with id {0} for deletion", id.ToString()));
             var dbProduct = await _repository.GetById(id);
-
             if (dbProduct == null)
             {
+                _logger.Warn("Not Found");
                 throw new ProductNotFoundException(String.Format("Product with id {0} not found.", id));
             }
 
+            _logger.Info(string.Format("Delete product {0}", id.ToString()));
             await _repository.Delete(dbProduct);
         }
 
         public async Task InsertImageForProduct(int productId, byte[] image)
         {
+            _logger.Info(string.Format("Getting product with id {0} for image update", productId.ToString()));
             Product dbProduct = await _repository.GetById(productId);
-
             if (dbProduct == null)
             {
+                _logger.Warn("Not Found");
                 throw new ProductNotFoundException(String.Format("Product with id {0} not found.", productId));
             }
 
             dbProduct.Image = image;
             dbProduct.LastUpdated = DateTime.Now;
 
+            _logger.Info(string.Format("Update image for product {0}, image size is {1}KB", productId.ToString(), 
+                ((float)(image.Length) / 1024)));
             await _repository.Update(dbProduct);
         }
 
@@ -108,7 +132,7 @@ namespace Products.WebApi.Services
 
         #region Utils
 
-        // This method is marked as internal for testing purpose, a validation framework should be used and injected to the service.
+        // Marked as internal for test purposes, could use a validation framework (injected to the service)
         internal void ValidateProductModel(AddEditProductDto product)
         {
             if (product == null)
@@ -127,8 +151,7 @@ namespace Products.WebApi.Services
             }
         }
 
-        // A library like Automapper should be used for mapping, or also a "home-made" framework is fine, but an interface should be
-        // passed to the service so we can unit test it better. This method is marked as internal so we can test it.
+        // Could use an object mapper (e.g. Automapper), marked as internal for test purposes
         internal ViewProductDto MapProductToViewProductDto(Product product)
         {
             var dto = new ViewProductDto()

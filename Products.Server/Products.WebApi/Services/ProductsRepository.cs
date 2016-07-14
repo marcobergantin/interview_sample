@@ -53,7 +53,6 @@ namespace Products.WebApi.Services
         private async Task<Product> GetProductFromDbById(int id)
         {
             var product = (await _context.ProductSet.Where(x => x.Id == id).ToListAsync()).FirstOrDefault();
-
             return product;
         }
     }
