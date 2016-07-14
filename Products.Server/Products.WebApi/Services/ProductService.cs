@@ -4,6 +4,7 @@ using Products.WebApi.Models;
 using System;
 using System.Threading.Tasks;
 using Products.WebApi.Exceptions;
+using NLog;
 
 namespace Products.WebApi.Services
 {
@@ -12,16 +13,15 @@ namespace Products.WebApi.Services
         #region Fields
 
         IProductsRepository _repository;
-        IProductsLogger _logger;
+        private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
         #endregion
 
         #region Constructor
 
-        public ProductsService(IProductsRepository repository, IProductsLogger logger)
+        public ProductsService(IProductsRepository repository)
         {
             _repository = repository;
-            _logger = logger;
         }
 
         #endregion

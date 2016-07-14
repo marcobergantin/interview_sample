@@ -1,5 +1,6 @@
 ﻿using Ninject;
 using Products.WebApi.IoC;
+using Products.WebApi.Logging;
 using System.Web.Http;
 using System.Web.Http.Dependencies;
 using System.Web.Http.Tracing;
@@ -25,11 +26,10 @@ namespace Products.WebApi
             //Dependency Resolver setup
             IKernel kernel = new StandardKernel(new ResolverModule());
             IDependencyResolver ninjectResolver = new NinjectResolver(kernel);
-
             GlobalConfiguration.Configuration.DependencyResolver = ninjectResolver;
 
-            GlobalConfiguration.Configuration.Services.Replace(typeof(ITraceWriter),
-                (ITraceWriter)(GlobalConfiguration.Configuration.DependencyResolver.GetService(typeof(ITraceWriter))));
+            //use custom logger for web api tracing
+            GlobalConfiguration.Configuration.Services.Replace(typeof(ITraceWriter), new Logger());
         }
     }
 }

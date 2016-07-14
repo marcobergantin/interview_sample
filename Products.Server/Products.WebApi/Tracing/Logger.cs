@@ -1,18 +1,16 @@
-﻿using Products.WebApi.Contracts;
+﻿using NLog;
 using System;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Text;
-using System.Web.Http;
 using System.Web.Http.Tracing;
 
 namespace Products.WebApi.Logging
 {
     public sealed class Logger : ITraceWriter
     {
-        private static readonly IProductsLogger classLogger = (IProductsLogger)(GlobalConfiguration.Configuration.
-                                                                DependencyResolver.GetService(typeof(IProductsLogger)));
-
+        private static readonly NLog.Logger classLogger = LogManager.GetCurrentClassLogger();
+        
         private static readonly Lazy<Dictionary<TraceLevel, Action<string>>> loggingMap =
             new Lazy<Dictionary<TraceLevel, Action<string>>>(() => new Dictionary<TraceLevel, Action<string>>
                 {
