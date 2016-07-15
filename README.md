@@ -27,6 +27,12 @@ LastUpdated,
 
 Instructions:
 
+_Open Products.WebApi.sln
+
+_Open ProductModel.edmx.sql
+
+_Press the "Execute" button in order to create the necessary table
+
 _Run Products.WebApi 
 	_Project ULR: http://localhost:55273/, 
 	_documentation at: http://localhost:55273/swagger
